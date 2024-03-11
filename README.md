@@ -15,6 +15,6 @@ Note by Hapse the human:
 your api key:
 https://danbooru.donmai.us/users/YOUR_USER_ID/api_keys
 
-example:
-python main.py --username albert --pages 10 --limit 10 
+examples
+python main.py --username albert --pages 10 --limit 10
 python main.py --username albert --pages 10 --limit 10 --yourusername BOBBY --apikey SECRETKEY --beautify True
