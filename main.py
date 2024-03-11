@@ -1,8 +1,10 @@
+#Made by a human and an AI, I love you AI, plz dont murder me once you take over the world
 import requests
 import json
 import time
+from operator import itemgetter  # For sorting by value
 
-def get_data(api_url, page):
+def get_data(api_url, page, limit):
     """Fetches JSON data from the specified API URL with pagination.
 
     Args:
@@ -13,28 +15,29 @@ def get_data(api_url, page):
         list: A list of dictionaries containing extracted tags.
     """
 
-    params = {"limit": 2, "page": page}  # Base parameters
+    params = {"limit": limit, "page": page}  # Base parameters
 
     url = f"{api_url}"  # Start with base URL
 
     if params:  # Add parameters if any
-        url += "?" + "&".join([f"{k}={v}" for k, v in params.items()])
+        url += "&".join([f"{k}={v}" for k, v in params.items()])
 
+    print(url)
     response = requests.get(url)
     response.raise_for_status()  # Raise an exception for non-200 status codes
 
     data = response.json()  # Assuming the response is valid JSON
 
-    # Extract and split tag_string from each object
+    # Extract and split tag_string_general from each object
     processed_data = []
     for item in data:
-        if "tag_string" in item:  # Check if "tag_string" exists
-            tags = item["tag_string"].split()  # Split tags using whitespace
+        if "tag_string_general" in item:  # Check if "tag_string_general" exists
+            tags = item["tag_string_general"].split()  # Split tags using whitespace
             processed_data.append({"tags": tags})  # Store extracted tags
 
     return processed_data
 
-def save_to_json(data, filename):
+def save_to_json(data, filename, beautify):
     """Saves the provided data to a JSON file without indentation.
 
     Args:
@@ -47,33 +50,42 @@ def save_to_json(data, filename):
 
 def main():
     """Parses command-line arguments and runs the script."""
-
+    #Example:
+    # https://danbooru.donmai.us/posts.json?login=USERNAME&api_key=APIKEY&tags=fav:USERNAME&limit=2&page=1
+    # https://danbooru.donmai.us/posts.json?tags=fav:albert&limit=2&page=1
+    
     import argparse
 
     parser = argparse.ArgumentParser(description="Extract and count tags from an API")
-    parser.add_argument("username", help="The username to use with the API")
-    parser.add_argument("pages", type=int, help="The number of pages to fetch")
-    parser.add_argument("api_key", help="The API key for authentication (optional)")
+    parser.add_argument("--username", help="The username to use with the API", required=True)
+    parser.add_argument("--pages", type=int, help="The number of pages to fetch", required=True)
+    parser.add_argument("--limit", type=int, help="Max 200", required=True)
+    parser.add_argument("--yourusername", help="Only needed if you have an API key (optional)", required=False)
+    parser.add_argument("--apikey", help="The API key for authentication (optional)", required=False)
+    parser.add_argument("--beautify", help="Beautify the json so its easier to read, True/False (optional)", required=False, default=False)
     args = parser.parse_args()
 
-    base_url = "https://danbooru.donmai.us/posts.json"  # Base URL
+    base_url = "https://danbooru.donmai.us/posts.json?"  # Base URL
 
     # Construct API URL including username and API key if provided
     api_url = f"{base_url}"
-    if args.username:
-        api_url += f"?login={args.username}"
-    if args.api_key:
-        api_url += f"&api_key={args.api_key}"
-
-    if not args.api_key:
-        print("WARNING: No API key provided. Authentication might be required for this API.")
+    if args.apikey:
+        api_url += f"login={args.yourusername}"
+        api_url += f"&api_key={args.apikey}" + "&"
 
     all_data = []
     total_fav_tags = {}
 
     for page in range(1, args.pages + 1):
-        page_data = get_data(api_url, page)
+        page_data = get_data(api_url, page, args.limit)
+
+        # Break if nothing is returned because that means... theres nothing left?
+        if page_data.count == 0:
+            break
+
         all_data.extend(page_data)
+
+        #you can do more calls than this if youre gold or platinum but eh... No rush for me, check here for info: https://danbooru.donmai.us/wiki_pages/help%3Ausers
         time.sleep(1)
 
     for item in all_data:
@@ -81,7 +93,10 @@ def main():
         for tag in tags:
             total_fav_tags[tag] = total_fav_tags.get(tag, 0) + 1
 
-    save_to_json(total_fav_tags, "total_fav_tags.json")
+    # Sort by the tag with the highest value!
+    sorted_tags = sorted(total_fav_tags.items(), key=itemgetter(1), reverse=True)
+
+    save_to_json(sorted_tags, "total_fav_tags.json", args.beautify)
     print("Total fav tags saved to total_fav_tags.json")
 
 if __name__ == "__main__":
