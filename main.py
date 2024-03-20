@@ -101,7 +101,7 @@ def main():
     # Sort by the tag with the highest value!
     sorted_tags = sorted(total_fav_tags.items(), key=itemgetter(1), reverse=True)
 
-    save_to_json(sorted_tags, "total_fav_tags.json", args.beautify)
+    save_to_json(sorted_tags, "./files/total_fav_tags.json", args.beautify)
     print("Total fav tags saved to total_fav_tags.json")
 
 if __name__ == "__main__":
