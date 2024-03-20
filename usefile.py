@@ -56,19 +56,23 @@ def split_into_ratings(alldata):
     
     
 def create_fav_list(taglist,filename,tag_type):
-    just_the_tags = []
+    # just_the_tags = []
     total_fav_tags = {}
 
     for item in taglist:
         for tag in item[tag_type]:
             total_fav_tags[tag] = total_fav_tags.get(tag, 0) + 1
-            if just_the_tags.__contains__(tag) == False:
-                just_the_tags.append(tag)
 
     # Sort by the tag with the highest value!
     sorted_tags = sorted(total_fav_tags.items(), key=itemgetter(1), reverse=True)
     save_to_json(sorted_tags,'./files/rank_'+tag_type+'_'+filename)
     
+    print(sorted_tags)
+    just_the_tags = []
+    for tag in sorted_tags:
+        if just_the_tags.__contains__(tag[0]) == False:
+            just_the_tags.append(tag[0])
+        
     only_tags = ",".join(just_the_tags)
     save_to_json(only_tags,'./files/tags_'+tag_type+'_'+filename)
     
