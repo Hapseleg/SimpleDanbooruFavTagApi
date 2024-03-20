@@ -97,6 +97,8 @@ def main():
     create_fav_list(questionable,'questionable.json',"tag_string_general")
     create_fav_list(explicit,'explicit.json',"tag_string_general")
     
+    create_fav_list(data,'alldata.json',"tag_string_general")
+    
     
 
 if __name__ == "__main__":
