@@ -68,8 +68,10 @@ def create_fav_list(taglist,filename,tag_type):
     # Sort by the tag with the highest value!
     sorted_tags = sorted(total_fav_tags.items(), key=itemgetter(1), reverse=True)
     save_to_json(sorted_tags,'./files/rank_'+tag_type+'_'+filename)
-    save_to_json(just_the_tags,'./files/tags_'+tag_type+'_'+filename)
-            
+    
+    only_tags = ",".join(just_the_tags)
+    save_to_json(only_tags,'./files/tags_'+tag_type+'_'+filename)
+    
 
 def main():
     import argparse
