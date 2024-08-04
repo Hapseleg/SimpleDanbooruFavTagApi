@@ -1,8 +1,10 @@
 #Made by a human and an AI, I love you AI, plz dont murder me once you take over the world
+import os
 import requests
 import json
 import time
 from operator import itemgetter  # For sorting by value
+
 
 def get_data(api_url, page, limit):
     """Fetches JSON data from the specified API URL with pagination.
@@ -37,7 +39,7 @@ def get_data(api_url, page, limit):
 
     return processed_data
 
-def save_to_json(data, filename, beautify):
+def save_to_json(data, directory, filename, extension, beautify):
     """Saves the provided data to a JSON file.
 
     Args:
@@ -45,7 +47,21 @@ def save_to_json(data, filename, beautify):
         filename (str): The name of the output JSON file.
     """
 
-    with open(filename, 'w') as f:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    counter = 0
+    full_filename = f"{filename}_{counter}{extension}"
+    full_path = os.path.join(directory, full_filename)
+    print(full_path)
+
+    while os.path.exists(full_path):
+        counter += 1
+        full_filename = f"{filename}_{counter}{extension}"
+        full_path = os.path.join(directory, full_filename)
+        print(full_path)
+
+    with open(full_path, 'w') as f:
         if beautify:
             json.dump(data, f, indent=4)  # Set indent to 4
         else:
@@ -101,7 +117,7 @@ def main():
     # Sort by the tag with the highest value!
     sorted_tags = sorted(total_fav_tags.items(), key=itemgetter(1), reverse=True)
 
-    save_to_json(sorted_tags, "./files/total_fav_tags.json", args.beautify)
+    save_to_json(sorted_tags, "./files/", "total_fav_tags", ".json", args.beautify)
     print("Total fav tags saved to total_fav_tags.json")
 
 if __name__ == "__main__":
